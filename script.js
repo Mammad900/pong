@@ -1,3 +1,6 @@
+// Originally developed by @amir-kht
+// Refactored and improved by @Mammad900
+
 let canvas = document.querySelector("canvas");
 const gameWidth = canvas.width = document.body.clientWidth;
 const gameHeight = canvas.height = document.body.clientHeight;
