@@ -1,0 +1,75 @@
+html, body{
+    margin: 0px;
+    height: 100%;
+    background-color: gray;
+    overflow: hidden;
+    font-family: sans-serif;
+}
+canvas{
+    background-color: black;
+}
+.score-container {
+    text-align: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.score {
+    position: relative;
+}
+.score::after {
+    content: "+1";
+    position: absolute;
+    top: 100%;
+    left: 0;
+    font-size: 0.5em;
+    opacity: 0;
+}
+.score.bump::after {
+    opacity: 1;
+    animation: bump 1s forwards;
+}
+
+@keyframes bump {
+    from{
+        top: 100%;
+        opacity: 1;
+    }
+    to {
+        top: 50%;
+        opacity: 0;
+    }
+}
+#r, #b {
+    position: fixed;
+    font-style: italic;
+    font-family: Verdana;
+    visibility: visible;
+    font-size: 50px;
+}
+#r.bump, #b.bump {
+    animation: bump2 1s forwards;
+}
+#r {
+    color: rgb(203, 0, 0);
+    margin: 100px 20px;
+}
+#b {
+    color: aqua;
+    right: 0;
+    margin: 100px;
+}
+
+@keyframes bump2 {
+    from {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.25);
+    }
+    to {
+        transform: scale(1);
+    }
+}
