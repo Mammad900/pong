@@ -8,13 +8,14 @@ let c = canvas.getContext("2d");
 
 
 const debug = 1;
-const ballRadius = 10;
+const ballRadiusDefault = 10;
 const defaultBallSpeedX = 7, defaultBallSpeedY = 3;
 const paddleWidth = 10, paddleMargin = 20, paddleHeight = 200;
 const comboMinSpeed = 25, maxCombo = 3, comboHitSize = 0.5;
 const boomMessageTime = 1000;
 const hitAccelX = 1.2, hitAccelY = 1.05;
 const boomAccelX = 2, boomAccelY = 1.6;
+const dropChance = 0.001, dropSize = [20, 50];
 
 let paddle1X = paddleMargin;
 let paddle1Y = gameHeight / 2;
@@ -23,16 +24,20 @@ let paddle2X = gameWidth - paddleMargin;
 let paddle2Y = gameHeight / 2;
 let paddle2Height = paddleHeight;
 
+let ballRadius = ballRadiusDefault;
 let ballX, ballY;
 let ballSpeedY, ballSpeedX;
 let paddle1Speed = 0, paddle2Speed = 0;
 
 let score1 = 0, score2 = 0;
 let goodHit1 = 0, goodHit2 = 0;
+let drops = [];
 
 let lastFrame = Date.now();
 
 function resetBall() {
+    ballRadius = ballRadiusDefault;
+    paddle1Height = paddle2Height = paddleHeight;
     ballX = gameWidth / 2;
     ballY = gameHeight / 2;
     ballSpeedX = defaultBallSpeedX * (Math.random() > 0.5 ? -1 : 1);
@@ -64,6 +69,14 @@ function update(deltaTime) {
     ballX += ballSpeedX * deltaTime;
     ballY += ballSpeedY * deltaTime;
 
+    if (Math.random() < deltaTime * dropChance * (0.5 + goodHit1 + goodHit2) && drops.length < 5) {
+        const r = random(dropSize[0], dropSize[1]);
+        drops.push({
+            x: random(gameWidth / 4 + r, gameWidth - gameWidth / 4 - r),
+            y: random(r, gameHeight - r),
+            r
+        })
+    }
 
 
     // Check collision with left paddle
@@ -156,11 +169,51 @@ function update(deltaTime) {
     // Collision with top and bottom
     if (
         (ballY - ballRadius < 0 && ballSpeedY < 0)
-        || ballY >= window.innerHeight - 10
+        || ballY + ballRadius >= window.innerHeight - 10
     ) {
         ballSpeedY *= -1;
     }
 
+    let hitDrops = []
+    for (const drop of drops) {
+        const d = Math.hypot(drop.x - ballX, drop.y - ballY);
+        if (d < drop.r + ballRadius) { // Collision
+            hitDrops.push(drop);
+            console.log("Drop hit!");
+            switch (random(0, 8)) {
+                case 0:
+                    ballSpeedX *= 2;
+                    break;
+                case 1:
+                    ballSpeedX *= -1;
+                    break;
+                case 2:
+                    ballSpeedX *= 0.5;
+                    break;
+                case 3:
+                    ballSpeedY *= 2;
+                    break;
+                case 4:
+                    paddle1Height /= 1.5;
+                    break;
+                case 5:
+                    paddle1Height *= 1.5;
+                    break;
+                case 6:
+                    paddle2Height /= 1.5;
+                    break;
+                case 7:
+                    paddle2Height *= 1.5;
+                    break;
+                case 8:
+                    ballRadius *= 2;
+
+                default:
+                    break;
+            }
+        }
+    }
+    drops = drops.filter(drop => !hitDrops.includes(drop));
 
     paddle1Y = constrain(paddle1Y + paddle1Speed, paddle1Height / 2, gameHeight - paddle1Height / 2);
     paddle2Y = constrain(paddle2Y + paddle2Speed, paddle2Height / 2, gameHeight - paddle2Height / 2);
@@ -217,6 +270,14 @@ function draw() {
     // Paddle 2
     c.fillStyle = "aqua";
     c.fillRect(paddle2X, paddle2Y - paddle2Height / 2, paddleWidth, paddle2Height)
+
+    // Drops
+    for (const drop of drops) {
+        c.beginPath();
+        c.arc(drop.x, drop.y, drop.r, 0, Math.PI * 2); // circle
+        c.fillStyle = "gold";
+        c.fill();
+    }
 }
 
 document.body.addEventListener('keydown', e => {
