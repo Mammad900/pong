@@ -281,7 +281,7 @@ function draw() {
 }
 
 document.body.addEventListener('keydown', e => {
-    const paddleMaxSpeed = Math.sqrt(Math.sqrt(ballSpeedX ** 2 + ballSpeedY ** 2) * 12); // Get speed vector magnitude, then get its geometric mean with 12
+    const paddleMaxSpeed = Math.min(Math.hypot(ballSpeedX, ballSpeedY), 20); // Get speed vector magnitude, and make sure its no slower than 20 idkunits
     console.log(e.key);
     if (e.key == "w") {
         paddle1Speed = -paddleMaxSpeed
