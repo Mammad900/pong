@@ -2,8 +2,8 @@
 // Refactored and improved by @Mammad900
 
 let canvas = document.querySelector("canvas");
-const gameWidth = canvas.width = document.body.clientWidth;
-const gameHeight = canvas.height = document.body.clientHeight;
+let gameWidth = canvas.width = document.body.clientWidth;
+let gameHeight = canvas.height = document.body.clientHeight;
 let c = canvas.getContext("2d");
 
 
@@ -44,6 +44,20 @@ function resetBall() {
     ballSpeedY = defaultBallSpeedY * (Math.random() > 0.5 ? -1 : 1);
 }
 resetBall();
+function resetEverything() {
+    resetSize();
+    score1 = score2 = goodHit1 = goodHit2 = 0;
+    drops = [];
+    resetBall();
+}
+
+function resetSize() {
+    gameWidth = canvas.width = document.body.clientWidth;
+    gameHeight = canvas.height = document.body.clientHeight;
+    paddle1X = paddleMargin;
+    paddle1Y = paddle1Y = gameHeight / 2;
+    paddle2X = gameWidth - paddleMargin;
+}
 
 // Called every frame
 function frame() {
@@ -187,7 +201,7 @@ function update(deltaTime) {
             drop.x - drop.r > gameWidth ||
             drop.y - drop.r > gameHeight
         ) {
-            drop.delete = true; 
+            drop.delete = true;
         }
 
         const d = Math.hypot(drop.x - ballX, drop.y - ballY);
@@ -332,6 +346,33 @@ document.body.addEventListener('keyup', e => {
     if (e.key == 'ArrowDown') {
         paddle2Speed = 0
     }
+})
+
+document.body.addEventListener('contextmenu', () => {
+        console.log('fullscreen')
+        document.body.requestFullscreen();
+        screen.orientation.lock("landscape-primary");
+    isFullscreen = true;
+    resetSize();
+    setTimeout(() => {
+        resetEverything();
+    }, 2000);
+})
+
+document.body.addEventListener('touchmove', e => {
+    for (const touch of e.changedTouches) {
+        if (touch.clientX / gameWidth < 0.25) {
+            paddle1Y = touch.clientY;
+        }
+        if (touch.clientX / gameWidth > 0.75) {
+            paddle2Y = touch.clientY;
+        }
+    }
+    draw();
+})
+
+window.addEventListener('resize', () => {
+    resetSize();
 })
 
 function random(min, max) {
