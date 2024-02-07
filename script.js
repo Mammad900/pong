@@ -74,6 +74,8 @@ function update(deltaTime) {
         drops.push({
             x: random(gameWidth / 4 + r, gameWidth - gameWidth / 4 - r),
             y: random(r, gameHeight - r),
+            vx: Math.random() * 2 - 1,
+            vy: Math.random() * 2 - 1,
             r
         })
     }
@@ -176,10 +178,22 @@ function update(deltaTime) {
 
     let hitDrops = []
     for (const drop of drops) {
+        drop.x += drop.vx;
+        drop.y += drop.vy;
+
+        // delete out of range drops
+        if (drop.x + drop.r < 0 ||
+            drop.y + drop.r < 0 ||
+            drop.x - drop.r > gameWidth ||
+            drop.y - drop.r > gameHeight
+        ) {
+            drop.delete = true; 
+        }
+
         const d = Math.hypot(drop.x - ballX, drop.y - ballY);
         if (d < drop.r + ballRadius) { // Collision
             hitDrops.push(drop);
-            console.log("Drop hit!");
+            console.log("Drop shit!");
             switch (random(0, 8)) {
                 case 0:
                     ballSpeedX *= 2;
@@ -213,7 +227,7 @@ function update(deltaTime) {
             }
         }
     }
-    drops = drops.filter(drop => !hitDrops.includes(drop));
+    drops = drops.filter(drop => (!hitDrops.includes(drop)) && (!drop.delete));
 
     paddle1Y = constrain(paddle1Y + paddle1Speed, paddle1Height / 2, gameHeight - paddle1Height / 2);
     paddle2Y = constrain(paddle2Y + paddle2Speed, paddle2Height / 2, gameHeight - paddle2Height / 2);
