@@ -6,7 +6,7 @@ let gameWidth = canvas.width = document.body.clientWidth;
 let gameHeight = canvas.height = document.body.clientHeight;
 let c = canvas.getContext("2d");
 
-
+//#region Constants
 const debug = 1;
 const ballRadiusDefault = 10;
 const defaultBallSpeedX = 7, defaultBallSpeedY = 3;
@@ -16,7 +16,9 @@ const boomMessageTime = 1000;
 const hitAccelX = 1.2, hitAccelY = 1.05;
 const boomAccelX = 2, boomAccelY = 1.6;
 const dropChance = 0.001, dropSize = [20, 50];
+//#endregion
 
+//#region Game State
 let paddle1X = paddleMargin;
 let paddle1Y = gameHeight / 2;
 let paddle1Height = paddleHeight;
@@ -32,6 +34,7 @@ let paddle1Speed = 0, paddle2Speed = 0;
 let score1 = 0, score2 = 0;
 let goodHit1 = 0, goodHit2 = 0;
 let drops = [];
+//#endregion
 
 let lastFrame = Date.now();
 
@@ -80,9 +83,8 @@ function frame() {
 
 function update(deltaTime) {
     deltaTime /= 16; // Speed calculations were originally designed for 60Hz (16ms between frames). This is to compensate.
-    ballX += ballSpeedX * deltaTime;
-    ballY += ballSpeedY * deltaTime;
 
+    //#region Add drops
     if (Math.random() < deltaTime * dropChance * (0.5 + goodHit1 + goodHit2) && drops.length < 5) {
         const r = random(dropSize[0], dropSize[1]);
         drops.push({
@@ -93,9 +95,9 @@ function update(deltaTime) {
             r
         })
     }
+    //#endregion
 
-
-    // Check collision with left paddle
+    //#region Check collision with left paddle
     if (
         ballSpeedX < 0 &&
         ballX - ballRadius < paddle1X &&
@@ -129,17 +131,16 @@ function update(deltaTime) {
             updateHUD();
         }
     }
-    else if (ballSpeedX < 0 && ballX < 0) {
+    else if (ballSpeedX < 0 && ballX < 0) { // Goal
         score2++
         goodHit1 = goodHit2 = 0;
         updateHUD();
         scoreHUD(2);
         resetBall();
     }
+    //#endregion
 
-
-
-    // Check collision with right paddle
+    //#region Check collision with right paddle
     if (
         ballSpeedX > 0 &&
         ballX + ballRadius > paddle2X &&
@@ -174,22 +175,25 @@ function update(deltaTime) {
             updateHUD();
         }
     }
-    else if (ballSpeedX > 0 && ballX >= window.innerWidth) {
+    else if (ballSpeedX > 0 && ballX >= window.innerWidth) { // Goal
         score1++
         goodHit1 = goodHit2 = 0;
         updateHUD();
         scoreHUD(1);
         resetBall();
     }
+    //#endregion
 
-    // Collision with top and bottom
+    //#region Collision with top and bottom
     if (
         (ballY - ballRadius < 0 && ballSpeedY < 0)
         || ballY + ballRadius >= window.innerHeight - 10
     ) {
         ballSpeedY *= -1;
     }
+    //#endregion
 
+    //#region Check Drops
     let hitDrops = []
     for (const drop of drops) {
         drop.x += drop.vx;
@@ -242,9 +246,14 @@ function update(deltaTime) {
         }
     }
     drops = drops.filter(drop => (!hitDrops.includes(drop)) && (!drop.delete));
+    //#endregion
 
+    //#region Ball and paddle movement
+    ballX += ballSpeedX * deltaTime;
+    ballY += ballSpeedY * deltaTime;
     paddle1Y = constrain(paddle1Y + paddle1Speed * deltaTime, paddle1Height / 2, gameHeight - paddle1Height / 2);
     paddle2Y = constrain(paddle2Y + paddle2Speed * deltaTime, paddle2Height / 2, gameHeight - paddle2Height / 2);
+    //#endregion
 }
 requestAnimationFrame(frame);
 
