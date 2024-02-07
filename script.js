@@ -229,8 +229,8 @@ function update(deltaTime) {
     }
     drops = drops.filter(drop => (!hitDrops.includes(drop)) && (!drop.delete));
 
-    paddle1Y = constrain(paddle1Y + paddle1Speed, paddle1Height / 2, gameHeight - paddle1Height / 2);
-    paddle2Y = constrain(paddle2Y + paddle2Speed, paddle2Height / 2, gameHeight - paddle2Height / 2);
+    paddle1Y = constrain(paddle1Y + paddle1Speed * deltaTime, paddle1Height / 2, gameHeight - paddle1Height / 2);
+    paddle2Y = constrain(paddle2Y + paddle2Speed * deltaTime, paddle2Height / 2, gameHeight - paddle2Height / 2);
 }
 requestAnimationFrame(frame);
 
@@ -295,7 +295,7 @@ function draw() {
 }
 
 document.body.addEventListener('keydown', e => {
-    const paddleMaxSpeed = Math.min(Math.hypot(ballSpeedX, ballSpeedY), 20); // Get speed vector magnitude, and make sure its no slower than 20 idkunits
+    const paddleMaxSpeed = Math.min(Math.hypot(ballSpeedX, ballSpeedY), 40); // Get speed vector magnitude, and make sure its no slower than 40 idkunits
     console.log(e.key);
     if (e.key == "w") {
         paddle1Speed = -paddleMaxSpeed
