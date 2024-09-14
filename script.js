@@ -15,7 +15,7 @@ const comboMinSpeed = 25, maxCombo = 3, comboHitSize = 0.5;
 const boomMessageTime = 1000;
 const hitAccelX = 1.2, hitAccelY = 1.05;
 const boomAccelX = 2, boomAccelY = 1.6;
-const dropChance = 0.001, dropSize = [20, 50];
+const dropChance = /*0.001*/0.01, dropSize = [20, 50], crazyDropChance = /*0.25*/1;
 //#endregion
 
 //#region Game State
@@ -34,6 +34,10 @@ let paddle1Speed = 0, paddle2Speed = 0;
 let score1 = 0, score2 = 0;
 let goodHit1 = 0, goodHit2 = 0;
 let drops = [];
+
+let gravity = 0; // positive: down, negative: up
+let enableWalls = false;
+let lastHitDrop = "", lastHitDropType = "normal", lastHitDropOpen = false;
 //#endregion
 
 let lastFrame = Date.now();
@@ -45,6 +49,9 @@ function resetBall() {
     ballY = gameHeight / 2;
     ballSpeedX = defaultBallSpeedX * (Math.random() > 0.5 ? -1 : 1);
     ballSpeedY = defaultBallSpeedY * (Math.random() > 0.5 ? -1 : 1);
+
+    gravity = 0;
+    enableWalls = true;
 }
 resetBall();
 function resetEverything() {
@@ -92,7 +99,8 @@ function update(deltaTime) {
             y: random(r, gameHeight - r),
             vx: Math.random() * 2 - 1,
             vy: Math.random() * 2 - 1,
-            r
+            r,
+            crazy: Math.random() < crazyDropChance
         })
     }
     //#endregion
@@ -187,9 +195,13 @@ function update(deltaTime) {
     //#region Collision with top and bottom
     if (
         (ballY - ballRadius < 0 && ballSpeedY < 0)
-        || ballY + ballRadius >= window.innerHeight - 10
+        || ballY + ballRadius >= gameHeight - 10
     ) {
-        ballSpeedY *= -1;
+        if (enableWalls)
+            ballSpeedY *= -1;
+        else
+            ballY = (ballY+gameHeight) %gameHeight;
+        console.log(ballY);
     }
     //#endregion
 
@@ -212,43 +224,80 @@ function update(deltaTime) {
         if (d < drop.r + ballRadius) { // Collision
             hitDrops.push(drop);
             console.log("Drop shit!");
-            switch (random(0, 8)) {
-                case 0:
-                    ballSpeedX *= 2;
-                    break;
-                case 1:
-                    ballSpeedX *= -1;
-                    break;
-                case 2:
-                    ballSpeedX *= 0.5;
-                    break;
-                case 3:
-                    ballSpeedY *= 2;
-                    break;
-                case 4:
-                    paddle1Height /= 1.5;
-                    break;
-                case 5:
-                    paddle1Height *= 1.5;
-                    break;
-                case 6:
-                    paddle2Height /= 1.5;
-                    break;
-                case 7:
-                    paddle2Height *= 1.5;
-                    break;
-                case 8:
-                    ballRadius *= 2;
-
-                default:
-                    break;
+            if (drop.crazy) {
+                switch (random(0, 1)) {
+                    case 0:
+                        gravity = Math.random() / 2 - 0.5;
+                        lastHitDrop = "Gravity!";
+                        break;
+                    case 1:
+                        enableWalls = false;
+                        lastHitDrop = "No walls!"
+                        break;
+                }
+                lastHitDropType = 'crazy';
             }
+            else {
+                switch (random(0, 8)) {
+                    case 0:
+                        ballSpeedX *= 2;
+                        lastHitDrop = "2x Ball speed!";
+                        break;
+                    case 1:
+                        ballSpeedX *= -1;
+                        lastHitDrop = "Invert ball speed!";
+                        break;
+                    case 2:
+                        ballSpeedX *= 0.5;
+                        lastHitDrop = "Half ball speed!"
+                        break;
+                    case 3:
+                        ballSpeedY *= 2;
+                        lastHitDrop = "2x Vertical ball speed!"
+                        break;
+                    case 4:
+                        paddle1Height /= 1.5;
+                        lastHitDrop = "Red paddle shrink!"
+                        break;
+                    case 5:
+                        paddle1Height *= 1.5;
+                        lastHitDrop = "Red paddle grow!"
+                        break;
+                    case 6:
+                        paddle2Height /= 1.5;
+                        lastHitDrop = "Blue paddle shrink!"
+                        break;
+                    case 7:
+                        paddle2Height *= 1.5;
+                        lastHitDrop = "Blue paddle grow!"
+                        break;
+                    case 8:
+                        ballRadius *= 2;
+                        lastHitDrop = "Bigger ball!"
+                        break;
+
+                    default:
+                        break;
+                }
+                lastHitDropType = 'normal';
+            }
+            lastHitDropOpen = true;
+            updateHUD();
+            setTimeout(() => {
+                lastHitDropOpen = false;
+                updateHUD()
+            }, 2000);
+            setTimeout(() => {
+                lastHitDrop = '';
+                updateHUD()
+            }, 2500);
         }
     }
     drops = drops.filter(drop => (!hitDrops.includes(drop)) && (!drop.delete));
     //#endregion
 
     //#region Ball and paddle movement
+    ballSpeedY += gravity * deltaTime;
     ballX += ballSpeedX * deltaTime;
     ballY += ballSpeedY * deltaTime;
     paddle1Y = constrain(paddle1Y + paddle1Speed * deltaTime, paddle1Height / 2, gameHeight - paddle1Height / 2);
@@ -275,6 +324,8 @@ function updateHUD() {
     document.querySelector("#score-2").innerHTML = score2;
     document.querySelector("#r").innerHTML = goodHit1 === 3 ? "BOOM!" : goodHit1 === 0 ? "" : `Combo x${goodHit1}`;
     document.querySelector("#b").innerHTML = goodHit2 === 3 ? "BOOM!" : goodHit2 === 0 ? "" : `Combo x${goodHit2}`;
+    document.querySelector("#drop").innerHTML = lastHitDrop;
+    document.querySelector("#drop").className = `${lastHitDropType} ${lastHitDropOpen?'open':''}`
 }
 function scoreHUD(player) {
     const el = document.getElementById('score-' + player);
@@ -312,7 +363,7 @@ function draw() {
     for (const drop of drops) {
         c.beginPath();
         c.arc(drop.x, drop.y, drop.r, 0, Math.PI * 2); // circle
-        c.fillStyle = "gold";
+        c.fillStyle = drop.crazy ? "red" : "gold";
         c.fill();
     }
 }

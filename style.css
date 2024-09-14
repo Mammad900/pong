@@ -64,6 +64,25 @@ canvas{
     margin: 100px;
 }
 
+#drop {
+    position: absolute;
+    bottom: -75px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 50px;
+    transition: bottom 500ms;
+}
+#drop.open {
+    bottom: 0px;
+}
+#drop.crazy {
+    color: red;
+}
+#drop.normal {
+    color: gold
+}
+
 @keyframes bump2 {
     from {
         transform: scale(1);
