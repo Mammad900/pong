@@ -15,7 +15,7 @@ const comboMinSpeed = 25, maxCombo = 3, comboHitSize = 0.5;
 const boomMessageTime = 1000;
 const hitAccelX = 1.2, hitAccelY = 1.05;
 const boomAccelX = 2, boomAccelY = 1.6;
-const dropChance = /*0.001*/0.01, dropSize = [20, 50], crazyDropChance = /*0.25*/1;
+const dropChance = 0.001, dropSize = [20, 50], crazyDropChance = 0.25;
 //#endregion
 
 //#region Game State
