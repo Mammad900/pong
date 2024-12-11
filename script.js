@@ -15,7 +15,7 @@ const comboMinSpeed = 25, maxCombo = 3, comboHitSize = 0.5;
 const boomMessageTime = 1000;
 const hitAccelX = 1.2, hitAccelY = 1.05;
 const boomAccelX = 2, boomAccelY = 1.6;
-const dropChance = /*0.001*/0.01, dropSize = [20, 50], crazyDropChance = /*0.25*/1;
+const dropChance = 0.001, dropSize = [20, 50], crazyDropChance = 0.25;
 //#endregion
 
 //#region Game State
@@ -36,7 +36,7 @@ let goodHit1 = 0, goodHit2 = 0;
 let drops = [];
 
 let gravity = 0; // positive: down, negative: up
-let enableWalls = false;
+let enableWalls = true;
 let lastHitDrop = "", lastHitDropType = "normal", lastHitDropOpen = false;
 //#endregion
 
@@ -346,10 +346,17 @@ function draw() {
     c.clearRect(0, 0, canvas.width, canvas.height);
 
     // Ball
-    c.beginPath();
-    c.arc(ballX, ballY, ballRadius, 0, Math.PI * 2); // circle
     c.fillStyle = "white";
-    c.fill();
+    function drawBall(x, y) {
+        c.beginPath();
+        c.arc(x, y, ballRadius, 0, Math.PI * 2); // circle
+        c.fill();
+    }
+    drawBall(ballX, ballY);
+    if (!enableWalls) {
+        drawBall(ballX, ballY + gameHeight);
+        drawBall(ballX, ballY - gameHeight);
+    }
 
     // Paddle 1
     c.fillStyle = "red";
