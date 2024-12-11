@@ -33,6 +33,7 @@ let paddle1Speed = 0, paddle2Speed = 0;
 
 let score1 = 0, score2 = 0;
 let goodHit1 = 0, goodHit2 = 0;
+let lastBoom = 0;
 let drops = [];
 
 let gravity = 0; // positive: down, negative: up
@@ -52,11 +53,12 @@ function resetBall() {
 
     gravity = 0;
     enableWalls = true;
+    goodHit1 = goodHit2 = lastBoom = 0
 }
 resetBall();
 function resetEverything() {
     resetSize();
-    score1 = score2 = goodHit1 = goodHit2 = 0;
+    score1 = score2 = 0;
     drops = [];
     resetBall();
 }
@@ -129,6 +131,7 @@ function update(deltaTime) {
             if (goodHit1 == maxCombo) {
                 ballSpeedX *= boomAccelX;
                 ballSpeedY *= boomAccelY;
+                lastBoom = Date.now();
                 setTimeout(() => {
                     goodHit1 = Math.max(goodHit1 - maxCombo, 0);
                     updateHUD();
@@ -172,6 +175,7 @@ function update(deltaTime) {
             if (goodHit2 >= maxCombo) {
                 ballSpeedX *= boomAccelX;
                 ballSpeedY *= boomAccelY;
+                lastBoom = Date.now();
                 setTimeout(() => {
                     goodHit2 = Math.max(goodHit2 - maxCombo, 0);
                     updateHUD();
@@ -345,8 +349,14 @@ function comboHUD(player) {
 function draw() {
     c.clearRect(0, 0, canvas.width, canvas.height);
 
+    const boom1 = goodHit1 == 3;
+    const boom2 = goodHit2 == 3;
+    const boomPercent = lastBoom == 0 ? 0 : 1-Math.min((Date.now() - lastBoom)/1000, 1)
+
     // Ball
     c.fillStyle = "white";
+    c.shadowColor = lastBoom ? 'white' : 'transparent';
+    c.shadowBlur = 20;
     function drawBall(x, y) {
         c.beginPath();
         c.arc(x, y, ballRadius, 0, Math.PI * 2); // circle
@@ -359,14 +369,17 @@ function draw() {
     }
 
     // Paddle 1
-    c.fillStyle = "red";
+    c.fillStyle = boom1 ? `rgb(255,${Math.floor(boomPercent * 255)},${Math.floor(boomPercent * 255)})` : 'red';
+    c.shadowColor = boom1 ? `rgba(255,0,0,${boomPercent})` : 'transparent';
     c.fillRect(paddle1X - paddleWidth, paddle1Y - paddle1Height / 2, paddleWidth, paddle1Height);
 
     // Paddle 2
-    c.fillStyle = "aqua";
+    c.fillStyle = boom2 ? `rgb(${Math.floor(boomPercent*255)},255,255)` : 'aqua';
+    c.shadowColor = boom2 ? `rgba(0,255,255,${boomPercent})` : 'transparent';
     c.fillRect(paddle2X, paddle2Y - paddle2Height / 2, paddleWidth, paddle2Height)
 
     // Drops
+    c.shadowColor = 'transparent'
     for (const drop of drops) {
         c.beginPath();
         c.arc(drop.x, drop.y, drop.r, 0, Math.PI * 2); // circle
@@ -397,6 +410,20 @@ document.body.addEventListener('keydown', e => {
     if (e.key == '-' && debug) {
         ballSpeedX /= 2
         ballSpeedY /= 2
+    }
+    if (e.key == 'b' && debug) {
+        goodHit1 = 3; lastBoom = Date.now();
+        setTimeout(() => {
+            goodHit1 = Math.max(goodHit1 - maxCombo, 0);
+            updateHUD();
+        }, boomMessageTime)
+    }
+    if (e.key == 'd' && debug) {
+        goodHit2 = 3; lastBoom = Date.now();
+        setTimeout(() => {
+            goodHit2 = Math.max(goodHit2 - maxCombo, 0);
+            updateHUD();
+        }, boomMessageTime)
     }
 })
 document.body.addEventListener('keyup', e => {
