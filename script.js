@@ -391,10 +391,10 @@ function draw() {
 document.body.addEventListener('keydown', e => {
     const paddleMaxSpeed = Math.min(Math.hypot(ballSpeedX, ballSpeedY), 40); // Get speed vector magnitude, and make sure its no slower than 40 idkunits
     console.log(e.key);
-    if (e.key == "w") {
+    if (e.key.toLowerCase() == "w") {
         paddle1Speed = -paddleMaxSpeed
     }
-    if (e.key == "s") {
+    if (e.key.toLowerCase() == "s") {
         paddle1Speed = +paddleMaxSpeed
     }
     if (e.key == 'ArrowUp') {
@@ -428,10 +428,10 @@ document.body.addEventListener('keydown', e => {
 })
 document.body.addEventListener('keyup', e => {
     console.log(e.key)
-    if (e.key == "w") {
+    if (e.key.toLowerCase() == "w") {
         paddle1Speed = 0
     }
-    if (e.key == "s") {
+    if (e.key.toLowerCase() == "s") {
         paddle1Speed = 0
     }
     if (e.key == 'ArrowUp') {
