@@ -450,7 +450,7 @@ document.body.addEventListener('contextmenu', () => {
     resetSize();
     setTimeout(() => {
         resetEverything();
-    }, 2000);
+    }, 5000);
 })
 
 document.body.addEventListener('touchmove', e => {
