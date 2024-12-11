@@ -39,6 +39,8 @@ let drops = [];
 let gravity = 0; // positive: down, negative: up
 let enableWalls = true;
 let lastHitDrop = "", lastHitDropType = "normal", lastHitDropOpen = false;
+
+let activityThisRound = false;
 //#endregion
 
 let lastFrame = Date.now();
@@ -54,6 +56,8 @@ function resetBall() {
     gravity = 0;
     enableWalls = true;
     goodHit1 = goodHit2 = lastBoom = 0
+
+    activityThisRound = false;
 }
 resetBall();
 function resetEverything() {
@@ -134,10 +138,12 @@ function update(deltaTime) {
         }
     }
     else if (ballSpeedX < 0 && ballX < 0) { // Goal
-        score2++
+        if (activityThisRound) {
+            score2++;
+            scoreHUD(2);
+        }
         goodHit1 = goodHit2 = 0;
         updateHUD();
-        scoreHUD(2);
         resetBall();
     }
     //#endregion
@@ -179,10 +185,12 @@ function update(deltaTime) {
         }
     }
     else if (ballSpeedX > 0 && ballX >= window.innerWidth) { // Goal
-        score1++
+        if (activityThisRound) {
+            score1++;
+            scoreHUD(1);
+        }
         goodHit1 = goodHit2 = 0;
         updateHUD();
-        scoreHUD(1);
         resetBall();
     }
     //#endregion
@@ -388,15 +396,19 @@ document.body.addEventListener('keydown', e => {
     const paddleMaxSpeed = Math.min(Math.hypot(ballSpeedX, ballSpeedY), 40)*0.75; // Get speed vector magnitude, and make sure its no slower than 40 idkunits
     if (e.key.toLowerCase() == "w") {
         paddle1Speed = -(paddleMaxSpeed + Math.abs(ballY-paddle1Y)*10/gameHeight)
+        activityThisRound = true;
     }
     if (e.key.toLowerCase() == "s") {
         paddle1Speed = +(paddleMaxSpeed + Math.abs(ballY-paddle1Y)*10/gameHeight)
+        activityThisRound = true;
     }
     if (e.key == 'ArrowUp') {
-        paddle2Speed = -(paddleMaxSpeed + Math.abs(ballY-paddle2Y)*10/gameHeight)
+        paddle2Speed = -(paddleMaxSpeed + Math.abs(ballY-paddle2Y)*10/gameHeight);
+        activityThisRound = true;
     }
     if (e.key == 'ArrowDown') {
         paddle2Speed = +(paddleMaxSpeed + Math.abs(ballY-paddle2Y)*10/gameHeight)
+        activityThisRound = true;
     }
     if (e.key == '+' && debug) {
         ballSpeedX *= 2
