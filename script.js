@@ -76,16 +76,7 @@ function frame() {
     const now = Date.now();
     const d = now - lastFrame;
     lastFrame = now;
-    if (d < 50) {
-        update(d);
-    }
-    else { // Black magic to fast forward if tick was too long
-        const n = (d - (d % 50)) / 50;
-        for (let i = 0; i < n; i++) {
-            update(50);
-        }
-        update(d % 50);
-    }
+    update(Math.min(d, 50)); // dont jump too much when not being rendered
     draw();
     requestAnimationFrame(frame);
 }
