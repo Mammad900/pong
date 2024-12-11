@@ -13,7 +13,7 @@ const defaultBallSpeedX = 7, defaultBallSpeedY = 3;
 const paddleWidth = 10, paddleMargin = 20, paddleHeight = 200;
 const comboMinSpeed = 25, maxCombo = 3, comboHitSize = 0.5;
 const boomMessageTime = 1000;
-const hitAccelX = 1.2, hitAccelY = 1.05;
+const hitAccelX = 1.2, hitAccelY = 1.05, maxBallDeflect = Math.PI / 12;
 const boomAccelX = 2, boomAccelY = 1.6;
 const dropChance = 0.001, dropSize = [20, 50], crazyDropChance = 0.25;
 //#endregion
@@ -321,6 +321,15 @@ function ballCollision(paddleSpeed) {
     if (paddleSpeed * ballSpeedY < 0) {
         ballSpeedY *= -1;
     }
+    const mag = Math.hypot(ballSpeedX,ballSpeedY)
+    const rotate = Math.random() * maxBallDeflect;
+    // Rotation matrix
+    const vx = ballSpeedX * Math.cos(rotate) - ballSpeedY * Math.sin(rotate);
+    const vy = ballSpeedX * Math.sin(rotate) + ballSpeedY * Math.cos(rotate);
+    ballSpeedX = vx;
+    ballSpeedY = vy;
+
+    console.error(Math.hypot(vx,vy) - mag)
 }
 
 function updateHUD() {
