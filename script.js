@@ -326,8 +326,8 @@ function ballCollision(paddleSpeed) {
 function updateHUD() {
     document.querySelector("#score-1").innerHTML = score1;
     document.querySelector("#score-2").innerHTML = score2;
-    document.querySelector("#r").innerHTML = goodHit1 === 3 ? "BOOM!" : goodHit1 === 0 ? "" : `Combo x${goodHit1}`;
-    document.querySelector("#b").innerHTML = goodHit2 === 3 ? "BOOM!" : goodHit2 === 0 ? "" : `Combo x${goodHit2}`;
+    document.querySelector("#r").innerHTML = goodHit1 === maxCombo ? "BOOM!" : goodHit1 === 0 ? "" : `Combo x${goodHit1}`;
+    document.querySelector("#b").innerHTML = goodHit2 === maxCombo ? "BOOM!" : goodHit2 === 0 ? "" : `Combo x${goodHit2}`;
     document.querySelector("#drop").innerHTML = lastHitDrop;
     document.querySelector("#drop").className = `${lastHitDropType} ${lastHitDropOpen?'open':''}`
 }
@@ -349,8 +349,8 @@ function comboHUD(player) {
 function draw() {
     c.clearRect(0, 0, canvas.width, canvas.height);
 
-    const boom1 = goodHit1 == 3;
-    const boom2 = goodHit2 == 3;
+    const boom1 = goodHit1 == maxCombo;
+    const boom2 = goodHit2 == maxCombo;
     const boomPercent = lastBoom == 0 ? 0 : 1-Math.min((Date.now() - lastBoom)/1000, 1)
 
     // Ball
@@ -412,14 +412,14 @@ document.body.addEventListener('keydown', e => {
         ballSpeedY /= 2
     }
     if (e.key == 'b' && debug) {
-        goodHit1 = 3; lastBoom = Date.now();
+        goodHit1 = maxCombo; lastBoom = Date.now();
         setTimeout(() => {
             goodHit1 = Math.max(goodHit1 - maxCombo, 0);
             updateHUD();
         }, boomMessageTime)
     }
     if (e.key == 'd' && debug) {
-        goodHit2 = 3; lastBoom = Date.now();
+        goodHit2 = maxCombo; lastBoom = Date.now();
         setTimeout(() => {
             goodHit2 = Math.max(goodHit2 - maxCombo, 0);
             updateHUD();
