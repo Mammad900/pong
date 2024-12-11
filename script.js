@@ -196,7 +196,6 @@ function update(deltaTime) {
             ballSpeedY *= -1;
         else
             ballY = (ballY+gameHeight) %gameHeight;
-        console.log(ballY);
     }
     //#endregion
 
@@ -218,7 +217,6 @@ function update(deltaTime) {
         const d = Math.hypot(drop.x - ballX, drop.y - ballY);
         if (d < drop.r + ballRadius) { // Collision
             hitDrops.push(drop);
-            console.log("Drop shit!");
             if (drop.crazy) {
                 switch (random(0, 1)) {
                     case 0:
@@ -312,15 +310,13 @@ function ballCollision(paddleSpeed) {
     if (paddleSpeed * ballSpeedY < 0) {
         ballSpeedY *= -1;
     }
-    const mag = Math.hypot(ballSpeedX,ballSpeedY)
+
     const rotate = Math.random() * maxBallDeflect;
     // Rotation matrix
     const vx = ballSpeedX * Math.cos(rotate) - ballSpeedY * Math.sin(rotate);
     const vy = ballSpeedX * Math.sin(rotate) + ballSpeedY * Math.cos(rotate);
     ballSpeedX = vx;
     ballSpeedY = vy;
-
-    console.error(Math.hypot(vx,vy) - mag)
 }
 
 function updateHUD() {
@@ -390,7 +386,6 @@ function draw() {
 
 document.body.addEventListener('keydown', e => {
     const paddleMaxSpeed = Math.min(Math.hypot(ballSpeedX, ballSpeedY), 40)*0.75; // Get speed vector magnitude, and make sure its no slower than 40 idkunits
-    console.log(e.key);
     if (e.key.toLowerCase() == "w") {
         paddle1Speed = -(paddleMaxSpeed + Math.abs(ballY-paddle1Y)*10/gameHeight)
     }
@@ -427,7 +422,6 @@ document.body.addEventListener('keydown', e => {
     }
 })
 document.body.addEventListener('keyup', e => {
-    console.log(e.key)
     if (e.key.toLowerCase() == "w") {
         paddle1Speed = 0
     }
@@ -443,9 +437,8 @@ document.body.addEventListener('keyup', e => {
 })
 
 document.body.addEventListener('contextmenu', () => {
-        console.log('fullscreen')
-        document.body.requestFullscreen();
-        screen.orientation.lock("landscape-primary");
+    document.body.requestFullscreen();
+    screen.orientation.lock("landscape-primary");
     isFullscreen = true;
     resetSize();
     setTimeout(() => {
