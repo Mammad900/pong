@@ -103,11 +103,14 @@ function update(deltaTime) {
     //#endregion
 
     //#region Check collision with left paddle
+    function collision1(n) {
+        return ballY > (paddle1Y+n*gameHeight) - paddle1Height / 2 &&
+               ballY < (paddle1Y+n*gameHeight) + paddle1Height / 2
+    }
     if (
         ballSpeedX < 0 &&
         ballX - ballRadius < paddle1X &&
-        ballY > paddle1Y - paddle1Height / 2 &&
-        ballY < paddle1Y + paddle1Height / 2
+        (collision1(-1) || collision1(0) || collision1(1))
     ) {
         if (goodHit1 == 0) {
             updateHUD();
@@ -149,11 +152,14 @@ function update(deltaTime) {
     //#endregion
 
     //#region Check collision with right paddle
+    function collision2(n) {
+        return ballY > (paddle2Y+n*gameHeight) - paddle2Height / 2 &&
+               ballY < (paddle2Y+n*gameHeight) + paddle2Height / 2
+    }
     if (
         ballSpeedX > 0 &&
         ballX + ballRadius > paddle2X &&
-        ballY > paddle2Y - paddle2Height / 2 &&
-        ballY < paddle2Y + paddle2Height / 2
+        (collision2(-1) || collision2(0) || collision2(1))
     ) {
         if (goodHit2 == 0) {
             updateHUD();
@@ -301,8 +307,13 @@ function update(deltaTime) {
     ballSpeedY += gravity * deltaTime;
     ballX += ballSpeedX * deltaTime;
     ballY += ballSpeedY * deltaTime;
-    paddle1Y = constrain(paddle1Y + paddle1Speed * deltaTime, paddle1Height / 2, gameHeight - paddle1Height / 2);
-    paddle2Y = constrain(paddle2Y + paddle2Speed * deltaTime, paddle2Height / 2, gameHeight - paddle2Height / 2);
+    if (enableWalls) {
+        paddle1Y = constrain(paddle1Y + paddle1Speed * deltaTime, paddle1Height / 2, gameHeight - paddle1Height / 2);
+        paddle2Y = constrain(paddle2Y + paddle2Speed * deltaTime, paddle2Height / 2, gameHeight - paddle2Height / 2);
+    } else {
+        paddle1Y = (paddle1Y + paddle1Speed * deltaTime).mod(gameHeight)
+        paddle2Y = (paddle2Y + paddle2Speed * deltaTime).mod(gameHeight)
+    }
     //#endregion
 }
 requestAnimationFrame(frame);
@@ -376,11 +387,19 @@ function draw() {
     c.fillStyle = boom1 ? `rgb(255,${Math.floor(boomPercent * 255)},${Math.floor(boomPercent * 255)})` : 'red';
     c.shadowColor = boom1 ? `rgba(255,0,0,${boomPercent})` : 'transparent';
     c.fillRect(paddle1X - paddleWidth, paddle1Y - paddle1Height / 2, paddleWidth, paddle1Height);
+    if (!enableWalls) {
+        c.fillRect(paddle1X - paddleWidth, (paddle1Y - paddle1Height / 2) - gameHeight, paddleWidth, paddle1Height);
+        c.fillRect(paddle1X - paddleWidth, (paddle1Y - paddle1Height / 2) + gameHeight, paddleWidth, paddle1Height);
+    }
 
     // Paddle 2
     c.fillStyle = boom2 ? `rgb(${Math.floor(boomPercent*255)},255,255)` : 'aqua';
     c.shadowColor = boom2 ? `rgba(0,255,255,${boomPercent})` : 'transparent';
     c.fillRect(paddle2X, paddle2Y - paddle2Height / 2, paddleWidth, paddle2Height)
+    if (!enableWalls) {
+        c.fillRect(paddle2X, (paddle2Y - paddle2Height / 2) - gameHeight, paddleWidth, paddle2Height);
+        c.fillRect(paddle2X, (paddle2Y - paddle2Height / 2) + gameHeight, paddleWidth, paddle2Height);
+    }
 
     // Drops
     c.shadowColor = 'transparent'
@@ -479,4 +498,7 @@ function random(min, max) {
 }
 function constrain(input, min, max) {
     return input < min ? min : input > max ? max : input
+}
+Number.prototype.mod = function(n) {
+    return ((this%n)+n)%n;
 }
