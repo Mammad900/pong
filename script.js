@@ -398,19 +398,19 @@ function draw() {
 }
 
 document.body.addEventListener('keydown', e => {
-    const paddleMaxSpeed = Math.min(Math.hypot(ballSpeedX, ballSpeedY), 40); // Get speed vector magnitude, and make sure its no slower than 40 idkunits
+    const paddleMaxSpeed = Math.min(Math.hypot(ballSpeedX, ballSpeedY), 40)*0.75; // Get speed vector magnitude, and make sure its no slower than 40 idkunits
     console.log(e.key);
     if (e.key.toLowerCase() == "w") {
-        paddle1Speed = -paddleMaxSpeed
+        paddle1Speed = -(paddleMaxSpeed + Math.abs(ballY-paddle1Y)*10/gameHeight)
     }
     if (e.key.toLowerCase() == "s") {
-        paddle1Speed = +paddleMaxSpeed
+        paddle1Speed = +(paddleMaxSpeed + Math.abs(ballY-paddle1Y)*10/gameHeight)
     }
     if (e.key == 'ArrowUp') {
-        paddle2Speed = -paddleMaxSpeed
+        paddle2Speed = -(paddleMaxSpeed + Math.abs(ballY-paddle2Y)*10/gameHeight)
     }
     if (e.key == 'ArrowDown') {
-        paddle2Speed = +paddleMaxSpeed
+        paddle2Speed = +(paddleMaxSpeed + Math.abs(ballY-paddle2Y)*10/gameHeight)
     }
     if (e.key == '+' && debug) {
         ballSpeedX *= 2
