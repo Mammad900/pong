@@ -412,7 +412,7 @@ function draw() {
 }
 
 document.body.addEventListener('keydown', e => {
-    const paddleMaxSpeed = Math.min(Math.hypot(ballSpeedX, ballSpeedY), 40)*0.75; // Get speed vector magnitude, and make sure its no slower than 40 idkunits
+    const paddleMaxSpeed = Math.min(Math.hypot(ballSpeedX, ballSpeedY), 40); // Get speed vector magnitude, and make sure its no slower than 40 idkunits
     if (e.key.toLowerCase() == "w") {
         paddle1Speed = -(paddleMaxSpeed + Math.abs(ballY-paddle1Y)*10/gameHeight)
         activityThisRound = true;
