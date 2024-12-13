@@ -204,7 +204,7 @@ function update(deltaTime) {
     //#region Collision with top and bottom
     if (
         (ballY - ballRadius < 0 && ballSpeedY < 0)
-        || ballY + ballRadius >= gameHeight - 10
+        || (ballY + ballRadius >= gameHeight - 10 && ballSpeedY > 0)
     ) {
         if (enableWalls)
             ballSpeedY *= -1;
