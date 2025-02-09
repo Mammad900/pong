@@ -4,10 +4,12 @@
 let canvas = document.querySelector("canvas");
 let gameWidth = canvas.width = document.body.clientWidth;
 let gameHeight = canvas.height = document.body.clientHeight;
-let c = canvas.getContext("2d");
+let ctxMain = canvas.getContext("2d");
+let ctx = new OffscreenCanvas(gameWidth, gameHeight).getContext('2d');
 
 //#region Constants
 const debug = 1;
+const frameSample = 10;
 const ballRadiusDefault = 10;
 const defaultBallSpeedX = 7, defaultBallSpeedY = 3;
 const paddleWidth = 10, paddleMargin = 20, paddleHeight = 200;
@@ -44,6 +46,8 @@ let activityThisRound = false;
 //#endregion
 
 let lastFrame = Date.now();
+ctxMain.globalCompositeOperation = "lighter";
+ctxMain.globalAlpha = 2 / frameSample;
 
 function resetBall() {
     ballRadius = ballRadiusDefault;
@@ -78,10 +82,14 @@ function resetSize() {
 // Called every frame
 function frame() {
     const now = Date.now();
-    const d = now - lastFrame;
+    const d = Math.min(now - lastFrame, 30) / frameSample; // dont jump too much when not being rendered
     lastFrame = now;
-    update(Math.min(d, 50)); // dont jump too much when not being rendered
-    draw();
+    ctxMain.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < frameSample; i++) {
+        update(d);
+        draw();
+        ctxMain.drawImage(ctx.canvas, 0, 0)
+    }
     requestAnimationFrame(frame);
 }
 
@@ -362,20 +370,20 @@ function comboHUD(player) {
 }
 
 function draw() {
-    c.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const boom1 = goodHit1 == maxCombo;
     const boom2 = goodHit2 == maxCombo;
     const boomPercent = lastBoom == 0 ? 0 : 1-Math.min((Date.now() - lastBoom)/1000, 1)
 
     // Ball
-    c.fillStyle = "white";
-    c.shadowColor = lastBoom ? 'white' : 'transparent';
-    c.shadowBlur = 20;
+    ctx.fillStyle = "white";
+    ctx.shadowColor = lastBoom ? 'white' : 'transparent';
+    ctx.shadowBlur = 20;
     function drawBall(x, y) {
-        c.beginPath();
-        c.arc(x, y, ballRadius, 0, Math.PI * 2); // circle
-        c.fill();
+        ctx.beginPath();
+        ctx.arc(x, y, ballRadius, 0, Math.PI * 2); // circle
+        ctx.fill();
     }
     drawBall(ballX, ballY);
     if (!enableWalls) {
@@ -384,30 +392,30 @@ function draw() {
     }
 
     // Paddle 1
-    c.fillStyle = boom1 ? `rgb(255,${Math.floor(boomPercent * 255)},${Math.floor(boomPercent * 255)})` : 'red';
-    c.shadowColor = boom1 ? `rgba(255,0,0,${boomPercent})` : 'transparent';
-    c.fillRect(paddle1X - paddleWidth, paddle1Y - paddle1Height / 2, paddleWidth, paddle1Height);
+    ctx.fillStyle = boom1 ? `rgb(255,${Math.floor(boomPercent * 255)},${Math.floor(boomPercent * 255)})` : 'red';
+    ctx.shadowColor = boom1 ? `rgba(255,0,0,${boomPercent})` : 'transparent';
+    ctx.fillRect(paddle1X - paddleWidth, paddle1Y - paddle1Height / 2, paddleWidth, paddle1Height);
     if (!enableWalls) {
-        c.fillRect(paddle1X - paddleWidth, (paddle1Y - paddle1Height / 2) - gameHeight, paddleWidth, paddle1Height);
-        c.fillRect(paddle1X - paddleWidth, (paddle1Y - paddle1Height / 2) + gameHeight, paddleWidth, paddle1Height);
+        ctx.fillRect(paddle1X - paddleWidth, (paddle1Y - paddle1Height / 2) - gameHeight, paddleWidth, paddle1Height);
+        ctx.fillRect(paddle1X - paddleWidth, (paddle1Y - paddle1Height / 2) + gameHeight, paddleWidth, paddle1Height);
     }
 
     // Paddle 2
-    c.fillStyle = boom2 ? `rgb(${Math.floor(boomPercent*255)},255,255)` : 'aqua';
-    c.shadowColor = boom2 ? `rgba(0,255,255,${boomPercent})` : 'transparent';
-    c.fillRect(paddle2X, paddle2Y - paddle2Height / 2, paddleWidth, paddle2Height)
+    ctx.fillStyle = boom2 ? `rgb(${Math.floor(boomPercent*255)},255,255)` : 'aqua';
+    ctx.shadowColor = boom2 ? `rgba(0,255,255,${boomPercent})` : 'transparent';
+    ctx.fillRect(paddle2X, paddle2Y - paddle2Height / 2, paddleWidth, paddle2Height)
     if (!enableWalls) {
-        c.fillRect(paddle2X, (paddle2Y - paddle2Height / 2) - gameHeight, paddleWidth, paddle2Height);
-        c.fillRect(paddle2X, (paddle2Y - paddle2Height / 2) + gameHeight, paddleWidth, paddle2Height);
+        ctx.fillRect(paddle2X, (paddle2Y - paddle2Height / 2) - gameHeight, paddleWidth, paddle2Height);
+        ctx.fillRect(paddle2X, (paddle2Y - paddle2Height / 2) + gameHeight, paddleWidth, paddle2Height);
     }
 
     // Drops
-    c.shadowColor = 'transparent'
+    ctx.shadowColor = 'transparent'
     for (const drop of drops) {
-        c.beginPath();
-        c.arc(drop.x, drop.y, drop.r, 0, Math.PI * 2); // circle
-        c.fillStyle = drop.crazy ? "red" : "gold";
-        c.fill();
+        ctx.beginPath();
+        ctx.arc(drop.x, drop.y, drop.r, 0, Math.PI * 2); // circle
+        ctx.fillStyle = drop.crazy ? "red" : "gold";
+        ctx.fill();
     }
 }
 
