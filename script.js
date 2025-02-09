@@ -102,8 +102,8 @@ function update(deltaTime) {
         drops.push({
             x: random(gameWidth / 4 + r, gameWidth - gameWidth / 4 - r),
             y: random(r, gameHeight - r),
-            vx: Math.random() * 2 - 1,
-            vy: Math.random() * 2 - 1,
+            vx: Math.random() * 1 - 1,
+            vy: Math.random() * 1 - 1,
             r,
             crazy: Math.random() < crazyDropChance
         })
@@ -224,8 +224,8 @@ function update(deltaTime) {
     //#region Check Drops
     let hitDrops = []
     for (const drop of drops) {
-        drop.x += drop.vx;
-        drop.y += drop.vy;
+        drop.x += drop.vx * deltaTime;
+        drop.y += drop.vy * deltaTime;
 
         // delete out of range drops
         if (drop.x + drop.r < 0 ||
