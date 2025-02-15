@@ -1,7 +1,8 @@
 {
-  "dependencies": {
-    "ts-loader": "^9.5.2",
-    "webpack": "^5.97.1",
-    "webpack-cli": "^6.0.1"
+  "devDependencies": {
+    "bun-types": "^1.2.2"
+  },
+  "scripts": {
+    "build": "bun ./bundler.ts"
   }
 }
