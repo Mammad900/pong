@@ -480,9 +480,11 @@ document.body.addEventListener('touchmove', e => {
     for (const touch of e.changedTouches) {
         if (touch.clientX / gameSize[0] < 0.25) {
             paddle1Pos[1] = touch.clientY;
+            activityThisRound = true;
         }
         if (touch.clientX / gameSize[0] > 0.75) {
             paddle2Pos[1] = touch.clientY;
+            activityThisRound = true;
         }
     }
     draw();
